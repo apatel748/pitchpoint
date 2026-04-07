@@ -1,66 +1,57 @@
-{% extends "base.html" %}
-
-{% block title %}Global Chat - PitchPoint{% endblock %}
-
-{% block content %}
+{%extends "base.html" %}
+{%block title %}Chat{% endblock %}
+{%block content %}
 
 <div class="chat-container">
+    <h2>Chat</h2>
 
-    <h2> Global Chat</h2>
-
-    
+    <!-- Allows messages by unique and identifiable users (with username & badge)-->
     <div class="chat-box" id="chatBox">
-
-        {% for msg in messages %}
+        {% for m in messages %}
             <div class="message">
-
                 <div class="message-header">
                     <div>
-                        <span class="username">{{ msg.username }}</span>
-                        <span class="badge badge-{{ msg.badge }}">
-                            {{ msg.badge }}
+                        <span class="username">{{ m.username }}</span>
+                        <span class="badge badge-{{ m.badge }}">
+                            {{m.badge}}
                         </span>
-                    </div>
-
-                    <div class="timestamp">
-                        {{ msg.created_at.strftime('%b %d %H:%M') if msg.created_at else '' }}
                     </div>
                 </div>
 
                 <div class="message-text">
-                    {{ msg.message_text }}
+                    {{m.message_text}}
                 </div>
 
             </div>
         {% endfor %}
 
         {% if messages|length == 0 %}
-            <p>No messages yet...</p>
-        {% endif %}
+            <p>No messages</p>
+        {%endif%}
 
     </div>
 
     
-    {% if username %}
+    {%if username%}
         <form class="chat-input" method="POST" action="/chat/send">
 
             <input 
                 type="text" 
                 name="message_text"
                 maxlength="200"
-                placeholder="Type a message..."
+                placeholder="Type your message..."
                 required
             >
-
             <button type="submit">Send</button>
-
         </form>
+
     {% else %}
-        <p style="text-align:center;">Login to send messages</p>
+        <p style="text-align:center;">Login to chat</p>
     {% endif %}
 
 </div>
 
+<!--Keeps chat positioned at the bottom and refreshes every 5 seconds for new messages to appear-->
 <script>
     const chatBox = document.getElementById("chatBox");
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -70,4 +61,4 @@
     }, 5000);
 </script>
 
-{% endblock %}
+{%endblock%}

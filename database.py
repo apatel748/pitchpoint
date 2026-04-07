@@ -1,14 +1,12 @@
 from dotenv import load_dotenv
 import os
 import pymysql
-
 load_dotenv()
 
+#Creates a database connection to railway and maintains a session
 db = None
-
 def get_db():
     global db
-
     try:
         if db:
             db.ping(reconnect=True)
@@ -27,19 +25,14 @@ def get_db():
     )
     return db
 
-
+#Cursor object from database connection
 def get_cursor():
     return get_db().cursor()
-
-
-# ============================================================
-# TABLE CREATION
-# ============================================================
 
 def create_tables():
     cur = get_cursor()
 
-    # USERS
+    # Users table (accounts)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS Users (
         user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -48,7 +41,7 @@ def create_tables():
     )
     """)
 
-    # PREDICTIONS
+    # Predictions table, predictions made JOINED with user_id
     cur.execute("""
     CREATE TABLE IF NOT EXISTS Predictions (
         prediction_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -65,7 +58,7 @@ def create_tables():
     )
     """)
 
-    # CHAT MESSAGES
+    #Chat messages joined with user_id
     cur.execute("""
     CREATE TABLE IF NOT EXISTS ChatMessages (
         message_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -76,7 +69,7 @@ def create_tables():
     )
     """)
 
-    # MATCH RESULTS
+    #Results of finished matches
     cur.execute("""
     CREATE TABLE IF NOT EXISTS MatchResults (
         match_id INT PRIMARY KEY,
@@ -87,7 +80,7 @@ def create_tables():
     )
     """)
 
-    # USER STATS
+    #User stats (predictions, points, and winnings) JOINED with user table
     cur.execute("""
     CREATE TABLE IF NOT EXISTS UserStats (
         user_id INT PRIMARY KEY,

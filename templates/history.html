@@ -1,68 +1,46 @@
 {% extends "base.html" %}
+{%block title %} Predictions{% endblock %}
+{%block content%}
 
-{% block title %}My Predictions - PitchPoint{% endblock %}
-
-{% block content %}
+<!--Displays history of logged in user's predictions of all time-->
 
 <div class="history-container">
+    <h1>Predictions History</h1>
 
-    <h1> My Prediction History</h1>
-
-    {% for p in predictions %}
+    {%for p in predictions%}
         <div class="card">
-
             <h3>{{ p.home_team }} vs {{ p.away_team }}</h3>
-
             <p class="prediction-text">
-                Prediction:
-                <b>{{ p.predicted_home }} - {{ p.predicted_away }}</b>
+                Prediction: <b> {{p.predicted_home}} - {{p.predicted_away}}</b>
             </p>
 
             {% if p.points is not none %}
-
-                <p class="points-text"> Points: <b>{{ p.points }}</b></p>
-
+                <p class="points-text"> Points: <b> {{p.points}}</b></p>
                 {% if p.points == 5 %}
-                    <p class="result-perfect">Perfect Prediction </p>
+                    <p class="result-perfect">Perfect</p>
                 {% elif p.points == 3 %}
-                    <p class="result-correct">Correct Winner ✔</p>
+                    <p class="result-correct">Correct</p>
                 {% else %}
-                    <p class="result-none">No Points</p>
+                    <p class="result-none">No points</p>
                 {% endif %}
-
             {% else %}
-                <p class="result-pending"> Pending (match not finished)</p>
+                <p class="result-pending">Pending</p>
             {% endif %}
-
         </div>
-    {% endfor %}
 
-    {% if predictions|length == 0 %}
-        <p class="no-predictions">No predictions yet</p>
-    {% endif %}
+    {%endfor%}
 
+    {%if predictions|length == 0 %}
+        <p class="no-predictions">No predictions</p>
+    {%endif%}
     
     <div class="delete-account-section">
-
-        <hr>
-
-        <h3 class="delete-title">Danger Zone</h3>
-
-        <p class="delete-warning">
-            Deleting your account will permanently remove all your predictions, chat messages, and stats.
-        </p>
-
         <form method="POST" action="/delete-account"
-              onsubmit="return confirm('Are you sure you want to delete your account? This cannot be undone.');">
-
+              onsubmit="return confirm('Delete your account?');">
             <button type="submit" class="delete-button">
                 Delete Account
             </button>
-
         </form>
-
     </div>
-
 </div>
-
 {% endblock %}

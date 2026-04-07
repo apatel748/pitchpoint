@@ -1,28 +1,22 @@
+#Imports needed for the application
 from flask import Flask, render_template, request, redirect, session
 from dotenv import load_dotenv
-import os
-
-
 from database import get_cursor, get_db, create_tables
 from utils import *
-
+import os
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "pitchpoint-secret-key")
+app.secret_key = os.getenv("SECRET_KEY", "secret")
 
+#Calls/loads database.py to use in different routes
 create_tables()
 
-
-# ============================================================
-# ROUTES
-# ============================================================
-
+#Creates and renders index.html with matches via API
 @app.route("/")
 def home():
     process_results()
 
-    template_data = get_common_template_data()
     upcoming, finished = get_matches()
 
     user_predictions = {}
@@ -34,165 +28,128 @@ def home():
         upcoming=upcoming,
         finished=finished[:10],
         user_predictions=user_predictions,
-        **template_data
+        **get_common_template_data()
     )
 
-
+# Allows predictions to be be made and saved in the appropiate SQL table
 @app.route("/predict", methods=["POST"])
 def predict():
     if "user_id" not in session:
         return redirect("/login")
-
     try:
-        match_id = int(request.form.get("match_id", "").strip())
-        predicted_home = int(request.form.get("home", "").strip())
-        predicted_away = int(request.form.get("away", "").strip())
+        match_id = int(request.form["match_id"])
+        home = int(request.form["home"])
+        away = int(request.form["away"])
     except:
         return redirect("/")
 
-    home_team = request.form.get("home_team", "").strip()
-    away_team = request.form.get("away_team", "").strip()
-
-    if predicted_home < 0 or predicted_away < 0:
+    if home < 0 or away < 0:
         return redirect("/")
 
-    live_match = find_match_by_id(match_id)
-    if not live_match or live_match.get("status") not in ["SCHEDULED", "TIMED"]:
+    match = find_match_by_id(match_id)
+    if not match or match["status"] not in ["SCHEDULED", "TIMED"]:
         return redirect("/")
 
     cur = get_cursor()
 
-    cur.execute("""
-    SELECT prediction_id
-    FROM Predictions
-    WHERE user_id = %s AND match_id = %s
-    """, (session["user_id"], match_id))
-    existing = cur.fetchone()
-
-    if existing:
+    cur.execute("SELECT * FROM Predictions WHERE user_id=%s AND match_id=%s",
+                (session["user_id"], match_id))
+    if cur.fetchone():
         cur.execute("""
         UPDATE Predictions
-        SET home_team = %s,
-            away_team = %s,
-            predicted_home = %s,
-            predicted_away = %s
-        WHERE user_id = %s AND match_id = %s
-        """, (
-            home_team,
-            away_team,
-            predicted_home,
-            predicted_away,
-            session["user_id"],
-            match_id
-        ))
+        SET predicted_home=%s, predicted_away=%s
+        WHERE user_id=%s AND match_id=%s
+        """, (home, away, session["user_id"], match_id))
     else:
         cur.execute("""
-        INSERT INTO Predictions (
-            user_id, match_id, home_team, away_team, predicted_home, predicted_away
-        )
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO Predictions (user_id, match_id, home_team, away_team, predicted_home, predicted_away)
+        VALUES (%s,%s,%s,%s,%s,%s)
         """, (
             session["user_id"],
             match_id,
-            home_team,
-            away_team,
-            predicted_home,
-            predicted_away
+            request.form["home_team"],
+            request.form["away_team"],
+            home,
+            away
         ))
 
         cur.execute("""
         INSERT IGNORE INTO UserStats (user_id, total_predictions, total_winnings)
-        VALUES (%s, 0, 0)
+        VALUES (%s,0,0)
         """, (session["user_id"],))
 
         cur.execute("""
         UPDATE UserStats
         SET total_predictions = total_predictions + 1
-        WHERE user_id = %s
+        WHERE user_id=%s
         """, (session["user_id"],))
 
     get_db().commit()
     return redirect("/")
 
-
+#Renders history.html with retriving from preditions table
 @app.route("/history")
 def history():
     if "user_id" not in session:
         return redirect("/login")
-
+    
     process_results()
-    template_data = get_common_template_data()
-
     cur = get_cursor()
     cur.execute("""
-    SELECT
-        prediction_id,
-        match_id,
-        home_team,
-        away_team,
-        predicted_home,
-        predicted_away,
-        points,
-        calculated
+    SELECT *
     FROM Predictions
-    WHERE user_id = %s
+    WHERE user_id=%s
     ORDER BY prediction_id DESC
     """, (session["user_id"],))
-    predictions = cur.fetchall()
 
     return render_template(
         "history.html",
-        predictions=predictions,
-        **template_data
+        predictions=cur.fetchall(),
+        **get_common_template_data()
     )
 
-
+#Compares user points and creates leaderboard
 @app.route("/leaderboard")
 def leaderboard():
     process_results()
-    template_data = get_common_template_data()
 
     return render_template(
         "leaderboard.html",
         leaderboard_rows=get_leaderboard(),
-        **template_data
+        **get_common_template_data()
     )
 
-
+#Allows chat messages to be retrived from table
 @app.route("/chat")
 def chat():
     process_results()
-    template_data = get_common_template_data()
 
     return render_template(
         "chat.html",
         messages=get_chat(),
-        **template_data
+        **get_common_template_data()
     )
 
-
+#Chat_Message table stores user input from chat.html
 @app.route("/chat/send", methods=["POST"])
 def send_chat():
+
     if "user_id" not in session:
         return redirect("/login")
 
-    message_text = request.form.get("message_text", "").strip()
+    text = request.form.get("message_text", "").strip()
 
-    if not message_text:
-        return redirect("/chat")
+    if text:
+        cur = get_cursor()
+        cur.execute("""
+        INSERT INTO ChatMessages (user_id, message_text)
+        VALUES (%s,%s)
+        """, (session["user_id"], text[:200]))
+        get_db().commit()
 
-    if len(message_text) > 200:
-        message_text = message_text[:200]
-
-    cur = get_cursor()
-    cur.execute("""
-    INSERT INTO ChatMessages (user_id, message_text)
-    VALUES (%s, %s)
-    """, (session["user_id"], message_text))
-
-    get_db().commit()
     return redirect("/chat")
 
+# Uses delete SQL of the logged in account to remove data of the user_id
 
 @app.route("/delete-account", methods=["POST"])
 def delete_account():
@@ -200,76 +157,61 @@ def delete_account():
         return redirect("/login")
 
     cur = get_cursor()
-
-    cur.execute("""
-    DELETE FROM Users WHERE user_id = %s
-    """, (session["user_id"],))
-
+    cur.execute("DELETE FROM Users WHERE user_id=%s", (session["user_id"],))
     get_db().commit()
 
     session.clear()
     return redirect("/")
 
-
+#Checks user's credientals to ensure an account exists
 @app.route("/login", methods=["GET", "POST"])
+
 def login():
     if request.method == "GET":
-        template_data = get_common_template_data()
-        return render_template("login.html", **template_data)
-
-    username = request.form.get("username", "").strip()
-    password = request.form.get("password", "").strip()
-
-    if not username or not password:
-        template_data = get_common_template_data()
-        return render_template("login.html", **template_data)
+        return render_template("login.html", **get_common_template_data())
+    username = request.form.get("username", "")
+    password = request.form.get("password", "")
 
     cur = get_cursor()
     cur.execute("""
-    SELECT user_id, username
+    SELECT user_id
     FROM Users
-    WHERE username = %s AND password = %s
+    WHERE username=%s AND password=%s
     """, (username, password))
+
     user = cur.fetchone()
 
     if user:
         session["user_id"] = user["user_id"]
         return redirect("/")
+    return render_template("login.html", **get_common_template_data())
 
-    template_data = get_common_template_data()
-    return render_template("login.html", **template_data)
-
-
+# Creates an account and stores username and password along with a user_id in Users table
 @app.route("/signup", methods=["POST"])
 def signup():
-    username = request.form.get("username", "").strip()
-    password = request.form.get("password", "").strip()
+    username = request.form.get("username", "")
+    password = request.form.get("password", "")
 
     if not username or not password:
         return redirect("/login")
-
     cur = get_cursor()
 
     try:
         cur.execute("""
         INSERT INTO Users (username, password)
-        VALUES (%s, %s)
+        VALUES (%s,%s)
         """, (username, password))
-
-        new_user_id = cur.lastrowid
+        user_id = cur.lastrowid
 
         cur.execute("""
         INSERT INTO UserStats (user_id, total_predictions, total_winnings)
-        VALUES (%s, 0, 0)
-        """, (new_user_id,))
+        VALUES (%s,0,0)
+        """, (user_id,))
 
         get_db().commit()
-        return redirect("/login")
-
     except:
         get_db().rollback()
-        return redirect("/login")
-
+    return redirect("/login")
 
 @app.route("/logout")
 def logout():

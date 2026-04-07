@@ -1,14 +1,12 @@
-{% extends "base.html" %}
+{%extends "base.html" %}
+{%block title %} Leaderboard {%endblock %}
+{%block content %}
 
-{% block title %}Leaderboard - PitchPoint{% endblock %}
-
-{% block content %}
-
+<!--Creates a basic ranked leaderboard based on all user's points-->
 <div class="leaderboard-container">
-
     <div class="top-bar">
-        <h1> Leaderboard</h1>
-        <p class="subtitle">Top predictors ranked by total points</p>
+        <h1>Leaderboard</h1>
+        <p class="subtitle">Top Users</p>
     </div>
 
     <table class="leaderboard-table">
@@ -22,58 +20,34 @@
         </thead>
 
         <tbody>
-            {% for row in leaderboard_rows %}
+            {%for r in leaderboard_rows%}
             <tr>
-
-                
-                <td class="
-                    {% if loop.index == 1 %}rank-1
-                    {% elif loop.index == 2 %}rank-2
-                    {% elif loop.index == 3 %}rank-3
-                    {% endif %}
-                ">
+                <td>
                     {{ loop.index }}
                 </td>
-
-                
                 <td>
-                    <div class="leader-user">
-                        {{ row.username }}
-
-                        {% if loop.index == 1 %}
-                            <span class="crown"></span>
-                        {% endif %}
-                    </div>
+                    {{ r.username }}
                 </td>
-
-                
                 <td>
-                    <span class="badge badge-{{ row.badge }}">
-                        {{ row.badge }}
-                    </span>
+                    {{ r.badge }}
                 </td>
-
-                
                 <td>
-                    <b>{{ row.total_points }}</b>
+                    {{ r.total_points }}
                 </td>
-
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    {% if leaderboard_rows|length == 0 %}
-        <p style="text-align:center;">No users yet</p>
+    {% if leaderboard_rows|length == 0%}
+        <p style="text-align:center;">No users</p>
     {% endif %}
-
 </div>
 
 <script>
-    
     setTimeout(() => {
         window.location.reload();
     }, 10000);
 </script>
 
-{% endblock %}
+{%endblock%}

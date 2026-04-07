@@ -1,26 +1,28 @@
-
+/* Main styling and color theme for the app */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    background: #0a0a0a;
-    color: white;
+    background-color: #050608;
+    color: #e6edf3;
+    min-height: 100vh;
 }
 
-
 header {
-    background: #111;
-    padding: 10px 20px;
+    background: rgba(16, 20, 26, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 80px;
+    max-height: 90px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
 }
 
 header img {
     height: 130px;
-    width: auto
+    width: auto;
 }
-
+/* navigation bar styles and details */
 nav {
     display: flex;
     align-items: center;
@@ -32,16 +34,15 @@ nav span {
 }
 
 nav a {
-    color: white;
+    color: #e6edf3;
     margin-left: 12px;
     text-decoration: none;
     font-size: 14px;
 }
 
 nav a:hover {
-    text-decoration: underline;
+    color: #4CAF50;
 }
-
 
 .container {
     max-width: 900px;
@@ -49,110 +50,92 @@ nav a:hover {
     padding: 10px;
 }
 
-
 .card {
-    background: #111;
+    background: #161b22;
     padding: 12px;
     margin-bottom: 12px;
     border-radius: 6px;
-    border: 1px solid #222;
+    border: 1px solid #21262d;
 }
-
 
 form {
     margin-top: 10px;
 }
 
 input {
-    padding: 10px 12px;
+    padding: 8px;
     border: none;
-    border-radius: 6px;
-    outline: none;
-    background: #1a1a1a;
+    border-radius: 5px;
+    background: #21262d;
     color: white;
-    box-sizing: border-box;
     width: 100%;
-    max-width: 100%;
 }
 
 button {
-    padding: 10px 14px;
-    background: #67A415;
+    padding: 8px 12px;
+    background: #4CAF50;
     border: none;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background 0.2s ease;
-    box-sizing: border-box;
 }
 
 button:hover {
-    background: #467E14;
+    background: #3fa047;
 }
-
 
 .auth-container {
     max-width: 420px;
-    margin: 0 auto;
-    min-height: calc(100vh - 140px);
+    margin: auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     gap: 20px;
     padding: 20px;
 }
-
+/* styles for prediction form and auth box */ 
 .prediction-form {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
     align-items: center;
+    justify-content: flex-start;
 }
 
 .prediction-form input[type="number"] {
-    width: calc(50% - 5px);
-    min-width: 120px;
+    flex: 1;
+    min-width: 100px;
+    max-width: 140px;
+}
+
+.prediction-form button {
+    flex: 0 0 120px;
+    min-height: 42px;
 }
 
 .auth-box {
     width: 100%;
-    background: #111;
-    padding: 24px;
-    border-radius: 14px;
-    border: 1px solid #222;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-.auth-box h2 {
-    margin: 0 0 18px;
-    font-size: 1.5rem;
-    text-align: center;
+    background: #161b22;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #21262d;
 }
 
 .auth-box form {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    align-items: center;
 }
 
 .auth-box input {
-    width: 100%;
+    flex: 1;
+    min-width: 120px;
 }
 
 .auth-box button {
-    width: 140px;
-    margin: 0 auto;
-}
-
-.divider {
-    text-align: center;
-    color: #777;
+    flex: 0 0 120px;
+    min-height: 42px;
     margin: 0;
-    font-size: 0.95rem;
 }
-
-
+/* each colour/styles for different badge types */
 .badge {
     padding: 2px 6px;
     border-radius: 4px;
@@ -160,27 +143,45 @@ button:hover {
     margin-left: 4px;
 }
 
-.badge-Bronze { background: #5a3e2b; }
-.badge-Silver { background: #aaa; color: black; }
-.badge-Gold { background: gold; color: black; }
-.badge-Diamond { background: #00e5ff; color: black; }
+.badge-Bronze {
+    background: #5a3e2b;
+}
 
+.badge-Silver {
+    background: #aaa;
+    color: black;
+}
+
+.badge-Gold {
+    background: gold;
+    color: black;
+}
 
 .history-container {
     max-width: 900px;
     margin: auto;
 }
 
-.result-perfect { color: lime; }
-.result-correct { color: lightgreen; }
-.result-none { color: gray; }
+.result-perfect {
+    color: #4CAF50;
+}
 
+.result-correct {
+    color: #ffd54f;
+}
+
+.result-none {
+    color: #888;
+}
+
+.result-pending {
+    color: #aaa;
+}
 
 .chat-container {
     max-width: 800px;
     margin: auto;
 }
-
 
 .match-header {
     display: flex;
@@ -199,53 +200,40 @@ button:hover {
 }
 
 .team-logo {
-    width: 60px;
-    height: 60px;
+    width: 55px;
+    height: 55px;
     object-fit: contain;
-    filter: brightness(0.95);
 }
 
 .vs {
     font-weight: bold;
-    color: #999;
+    color: #888;
     font-size: 14px;
 }
 
 .match-meta {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     font-size: 13px;
     color: #aaa;
     margin-bottom: 10px;
     padding-top: 8px;
-    border-top: 1px solid #222;
+    border-top: 1px solid #21262d;
 }
-
-.match-time {
-    font-weight: 500;
-    color: #d1ffaa;
-}
-
-.match-status {
-    color: #888;
-    font-size: 12px;
-}
-
-
+/* chatbox and messages setup */
 .chat-box {
     height: 400px;
     overflow-y: auto;
-    background: #111;
+    background: #161b22;
     padding: 10px;
     border-radius: 6px;
-    border: 1px solid #222;
+    border: 1px solid #21262d;
 }
 
 .message {
     margin-bottom: 10px;
     padding: 6px;
-    background: #1a1a1a;
+    background: #21262d;
     border-radius: 4px;
 }
 
@@ -268,9 +256,7 @@ button:hover {
 .chat-input input {
     flex: 1;
     margin-right: 5px;
-    width: auto;
 }
-
 
 .leaderboard-container {
     max-width: 900px;
@@ -283,36 +269,12 @@ button:hover {
     border-collapse: collapse;
 }
 
-.leaderboard-table th,
-.leaderboard-table td {
+.leaderboard-table th, .leaderboard-table td {
     padding: 8px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #21262d;
     text-align: center;
 }
 
 .leaderboard-table th {
-    background: #111;
-}
-
-.rank-1 { color: gold; font-weight: bold; }
-.rank-2 { color: silver; font-weight: bold; }
-.rank-3 { color: #cd7f32; font-weight: bold; }
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.user-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    white-space: nowrap;
-}
-
-.user-metrics-inline {
-    color: #aaa;
-    font-size: 13px;
+    background: #161b22;
 }

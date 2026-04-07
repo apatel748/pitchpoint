@@ -1,152 +1,113 @@
-{% extends "base.html" %}
+{%extends "base.html" %}
+{%block title %} PitchPoint {%endblock %}
+{%block content %}
 
-{% block title %}PitchPoint{% endblock %}
+<!--Home page, where predictions are made if user is logged in-->
+{%if not username %}
+<p>Login to make predictions</p>
+{%endif %}
 
-{% block content %}
-
-{% if not username %}
-    <p style="text-align:center;">Login to start predicting ⚽</p>
-{% endif %}
-
-<h2>Matches</h2>
-
-
-<div class="tabs">
-    <button class="tab-button active" onclick="showTab(event, 'upcoming')">Upcoming</button>
-    <button class="tab-button" onclick="showTab(event, 'past')">Past</button>
-</div>
-
-
-<div id="upcoming" class="tab-content active">
-
+<!--Displays all games today via football-data.org API-->
+<h2>Today's Matches</h2>
+<div class="matches-section">
     {% for match in upcoming %}
-        <div class="card">
-
-            <div class="match-header">
-                <div class="team-info">
-                    {% if match.homeTeam.crest %}
-                        <img src="{{ match.homeTeam.crest }}" alt="{{ match.homeTeam.name }}" class="team-logo">
-                    {% endif %}
-                    <span>{{ match.homeTeam.name }}</span>
-                </div>
-                <span class="vs">vs</span>
-                <div class="team-info">
-                    {% if match.awayTeam.crest %}
-                        <img src="{{ match.awayTeam.crest }}" alt="{{ match.awayTeam.name }}" class="team-logo">
-                    {% endif %}
-                    <span>{{ match.awayTeam.name }}</span>
-                </div>
+    <div class="card">
+        <div class="match-header">
+            <div class="team-info">
+                {%if match.homeTeam.crest %}
+                <img src="{{ match.homeTeam.crest }}" class="team-logo">
+                {%endif%}
+                <span>{{match.homeTeam.name}}</span>
             </div>
-
-            <div class="match-meta">
-                <span class="match-time">{{ match.formatted_date }}</span>
-                <span class="match-status">{{ match.status }}</span>
+            <span class="vs">vs</span>
+            <div class="team-info">
+                {%if match.awayTeam.crest %}
+                <img src="{{ match.awayTeam.crest }}" class="team-logo">
+                {%endif%}
+                <span>{{match.awayTeam.name}}</span>
             </div>
+        </div>
 
-            {% set user_pred = user_predictions.get(match.id) %}
+        <div class="match-meta">
+            <span>{{match.formatted_date }}</span>
+            <span>{{match.status }}</span>
+        </div>
 
-            {% if user_pred %}
-                
-                <p>
-                    Your Prediction:
-                    <b>{{ user_pred.predicted_home }} - {{ user_pred.predicted_away }}</b>
-                </p>
+        <!--Creates prediction under the logged in user's ID, allowing editing-->
 
-                {% if username %}
-                    <form class="prediction-form" method="POST" action="/predict">
-                        <input type="hidden" name="match_id" value="{{ match.id }}">
-                        <input type="hidden" name="home_team" value="{{ match.homeTeam.name }}">
-                        <input type="hidden" name="away_team" value="{{ match.awayTeam.name }}">
+        {% set user_pred = user_predictions.get(match.id) %}
 
-                        <input type="number" name="home" value="{{ user_pred.predicted_home }}" min="0" required>
-                        <input type="number" name="away" value="{{ user_pred.predicted_away }}" min="0" required>
+        {%if username%}
+        <form method="POST" action="/predict" class="prediction-form">
+            <input type="hidden" name="match_id" value="{{ match.id }}">
+            <input type="hidden" name="home_team" value="{{ match.homeTeam.name }}">
+            <input type="hidden" name="away_team" value="{{ match.awayTeam.name }}">
 
-                        <button type="submit">Update</button>
-                    </form>
-                {% endif %}
-
+            {%if user_pred%}
+                <p>Your Prediction: <b>{{ user_pred.predicted_home }} - {{ user_pred.predicted_away }}</b></p>
+                <input type="number" name="home" value="{{ user_pred.predicted_home }}" min="0" required>
+                <input type="number" name="away" value="{{ user_pred.predicted_away }}" min="0" required>
+                <button type="submit">Update</button>
             {% else %}
-
-                {% if username %}
-                    
-                    <form class="prediction-form" method="POST" action="/predict">
-                        <input type="hidden" name="match_id" value="{{ match.id }}">
-                        <input type="hidden" name="home_team" value="{{ match.homeTeam.name }}">
-                        <input type="hidden" name="away_team" value="{{ match.awayTeam.name }}">
-
-                        <input type="number" name="home" placeholder="Home" min="0" required>
-                        <input type="number" name="away" placeholder="Away" min="0" required>
-
-                        <button type="submit">Predict</button>
-                    </form>
-                {% else %}
-                    <p>Login to predict</p>
-                {% endif %}
-
+                <input type="number" name="home" placeholder="Home" min="0" required>
+                <input type="number" name="away" placeholder="Away" min="0" required>
+                <button type="submit">Predict</button>
             {% endif %}
+        </form>
 
-        </div>
+        {% else %}
+        <p>Login to predict</p>
+        {% endif %}
+
+    </div>
     {% endfor %}
 
-    {% if upcoming|length == 0 %}
-        <p style="text-align:center;">No upcoming matches</p>
+    {%if upcoming|length == 0 %}
+    <p>No upcoming matches today</p>
     {% endif %}
 
 </div>
 
+<!--Uses results table to display finished matches for the day-->
 
-<div id="past" class="tab-content">
+<h2>Past Matches</h2>
+<div class="matches-section">
+    {%for match in finished%}
+    <div class="card">
 
-    {% for match in finished %}
-        <div class="card">
-
-            <div class="match-header">
-                <div class="team-info">
-                    {% if match.homeTeam.crest %}
-                        <img src="{{ match.homeTeam.crest }}" alt="{{ match.homeTeam.name }}" class="team-logo">
-                    {% endif %}
-                    <span>{{ match.homeTeam.name }}</span>
-                </div>
-                <span class="vs">vs</span>
-                <div class="team-info">
-                    {% if match.awayTeam.crest %}
-                        <img src="{{ match.awayTeam.crest }}" alt="{{ match.awayTeam.name }}" class="team-logo">
-                    {% endif %}
-                    <span>{{ match.awayTeam.name }}</span>
-                </div>
+        <div class="match-header">
+            <div class="team-info">
+                {% if match.homeTeam.crest %}
+                <img src="{{ match.homeTeam.crest }}" class="team-logo">
+                {% endif %}
+                <span>{{match.homeTeam.name}}</span>
             </div>
-
-            <div class="match-meta">
-                <span class="match-time">{{ match.formatted_date }}</span>
+            <span class="vs">vs</span>
+            <div class="team-info">
+                {% if match.awayTeam.crest %}
+                <img src="{{ match.awayTeam.crest }}" class="team-logo">
+                {% endif %}
+                <span>{{match.awayTeam.name}}</span>
             </div>
-
-            <p>
-                Final Score:
-                <b>
-                    {{ match.score.fullTime.home if match.score.fullTime.home is not none else "-" }}
-                    -
-                    {{ match.score.fullTime.away if match.score.fullTime.away is not none else "-" }}
-                </b>
-            </p>
-
         </div>
-    {% endfor %}
 
-    {% if finished|length == 0 %}
-        <p style="text-align:center;">No past matches</p>
-    {% endif %}
+        <div class="match-meta">
+            <span>{{match.formatted_date }}</span>
+        </div>
 
+        <p>
+            Final Score:
+            <b>
+                {{ match.score.fullTime.home if match.score.fullTime.home is not none else "-" }}
+                -
+                {{ match.score.fullTime.away if match.score.fullTime.away is not none else "-" }}
+            </b>
+        </p>
+    </div>
+    {%endfor%}
+
+    {%if finished|length == 0%}
+    <p>No finished games today.</p>
+    {%endif%}
 </div>
-
-
-<script>
-function showTab(event, tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-
-    document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
-}
-</script>
-
-{% endblock %}
+{%endblock%}
