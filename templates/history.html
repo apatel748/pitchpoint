@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}My Predictions - PitchPoint{% endblock %}
+
+{% block content %}
+
+<div class="history-container">
+
+    <h1> My Prediction History</h1>
+
+    {% for p in predictions %}
+        <div class="card">
+
+            <h3>{{ p.home_team }} vs {{ p.away_team }}</h3>
+
+            <p class="prediction-text">
+                Prediction:
+                <b>{{ p.predicted_home }} - {{ p.predicted_away }}</b>
+            </p>
+
+            {% if p.points is not none %}
+
+                <p class="points-text"> Points: <b>{{ p.points }}</b></p>
+
+                {% if p.points == 5 %}
+                    <p class="result-perfect">Perfect Prediction </p>
+                {% elif p.points == 3 %}
+                    <p class="result-correct">Correct Winner ✔</p>
+                {% else %}
+                    <p class="result-none">No Points</p>
+                {% endif %}
+
+            {% else %}
+                <p class="result-pending"> Pending (match not finished)</p>
+            {% endif %}
+
+        </div>
+    {% endfor %}
+
+    {% if predictions|length == 0 %}
+        <p class="no-predictions">No predictions yet</p>
+    {% endif %}
+
+    
+    <div class="delete-account-section">
+
+        <hr>
+
+        <h3 class="delete-title">Danger Zone</h3>
+
+        <p class="delete-warning">
+            Deleting your account will permanently remove all your predictions, chat messages, and stats.
+        </p>
+
+        <form method="POST" action="/delete-account"
+              onsubmit="return confirm('Are you sure you want to delete your account? This cannot be undone.');">
+
+            <button type="submit" class="delete-button">
+                Delete Account
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

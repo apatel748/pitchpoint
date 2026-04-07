@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - PitchPoint{% endblock %}
+
+{% block content %}
+
+<div class="leaderboard-container">
+
+    <div class="top-bar">
+        <h1> Leaderboard</h1>
+        <p class="subtitle">Top predictors ranked by total points</p>
+    </div>
+
+    <table class="leaderboard-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Badge</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in leaderboard_rows %}
+            <tr>
+
+                
+                <td class="
+                    {% if loop.index == 1 %}rank-1
+                    {% elif loop.index == 2 %}rank-2
+                    {% elif loop.index == 3 %}rank-3
+                    {% endif %}
+                ">
+                    {{ loop.index }}
+                </td>
+
+                
+                <td>
+                    <div class="leader-user">
+                        {{ row.username }}
+
+                        {% if loop.index == 1 %}
+                            <span class="crown"></span>
+                        {% endif %}
+                    </div>
+                </td>
+
+                
+                <td>
+                    <span class="badge badge-{{ row.badge }}">
+                        {{ row.badge }}
+                    </span>
+                </td>
+
+                
+                <td>
+                    <b>{{ row.total_points }}</b>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if leaderboard_rows|length == 0 %}
+        <p style="text-align:center;">No users yet</p>
+    {% endif %}
+
+</div>
+
+<script>
+    
+    setTimeout(() => {
+        window.location.reload();
+    }, 10000);
+</script>
+
+{% endblock %}

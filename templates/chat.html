@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Global Chat - PitchPoint{% endblock %}
+
+{% block content %}
+
+<div class="chat-container">
+
+    <h2> Global Chat</h2>
+
+    
+    <div class="chat-box" id="chatBox">
+
+        {% for msg in messages %}
+            <div class="message">
+
+                <div class="message-header">
+                    <div>
+                        <span class="username">{{ msg.username }}</span>
+                        <span class="badge badge-{{ msg.badge }}">
+                            {{ msg.badge }}
+                        </span>
+                    </div>
+
+                    <div class="timestamp">
+                        {{ msg.created_at.strftime('%b %d %H:%M') if msg.created_at else '' }}
+                    </div>
+                </div>
+
+                <div class="message-text">
+                    {{ msg.message_text }}
+                </div>
+
+            </div>
+        {% endfor %}
+
+        {% if messages|length == 0 %}
+            <p>No messages yet...</p>
+        {% endif %}
+
+    </div>
+
+    
+    {% if username %}
+        <form class="chat-input" method="POST" action="/chat/send">
+
+            <input 
+                type="text" 
+                name="message_text"
+                maxlength="200"
+                placeholder="Type a message..."
+                required
+            >
+
+            <button type="submit">Send</button>
+
+        </form>
+    {% else %}
+        <p style="text-align:center;">Login to send messages</p>
+    {% endif %}
+
+</div>
+
+<script>
+    const chatBox = document.getElementById("chatBox");
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(() => {
+        window.location.reload();
+    }, 5000);
+</script>
+
+{% endblock %}

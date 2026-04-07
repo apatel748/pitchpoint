@@ -1,0 +1,54 @@
+<header>
+
+    <a href="/" class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    </a>
+
+    <nav>
+
+        {% if username %}
+
+            <div class="nav-right">
+
+                
+                <div class="user-inline">
+
+                    <span class="username"><b>{{ username }}</b></span>
+
+                    <span class="badge badge-{{ badge_name }}">
+                        {{ badge_name }}
+                    </span>
+
+                    <span class="user-metrics-inline">
+                        {{ total_points }} pts |
+                        {{ total_predictions }} predictions |
+                        ✔ {{ total_winnings }} wins
+                    </span>
+
+                </div>
+
+                
+                <div class="nav-links">
+                    <a href="/">Home</a>
+                    <a href="/chat">Chat</a>
+                    <a href="/history">History</a>
+                    <a href="/leaderboard">Leaderboard</a>
+                    <a href="/logout">Logout</a>
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/chat">Chat</a>
+                <a href="/leaderboard">Leaderboard</a>
+                <a href="/login">Account</a>
+            </div>
+
+        {% endif %}
+
+    </nav>
+
+</header>
